@@ -27,12 +27,5 @@ class CMemory_Database {
 };
 ```
 
-- parsing will be done from begin to first `(`
-  - if `(` not found - error, has to be there
-  - parsed substring has to be one of `INSERT`, `DELETE`, `KEY_EQUALS`, `AVERAGE`, `KEY_GREATER`, `KEY_LESS`, `FIND_VALUE`, `MAX`, `MIN`
-    - stored i a `std::map` of strings to enumeration types?
-    - if none found - error
-- then parsing until `)` is found
-  - if not found - error, has to be there
-  - then parsing by `,`
+- parsing will be done with **regex**
 - when parsing, **white spaces need to be ignored!!**
