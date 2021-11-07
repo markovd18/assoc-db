@@ -1,4 +1,8 @@
-﻿cmake_minimum_required (VERSION 3.1)
+﻿#
+# Created by <a href='mailto:markovd@students.zcu.cz'>David Markov</a> on 7.11.21.
+#
+
+cmake_minimum_required (VERSION 3.1)
 project ("kiv-cpp-sp-02")
 
 set (CMAKE_CXX_STANDARD 20)
