@@ -67,7 +67,7 @@ namespace app {
 	}
 
     void Process_Command(const std::string &line, std::ostream &output_stream) {
-        static const std::regex command_regex(R"(\w+(\ *)?\(((\d+)?(\,(\ *)?\d+(\ *)?)?)+\))");
+        static const std::regex command_regex(R"(\w+(\ *)?\(((\d+(\.\d+)?|(\"\w+\"))?(\,(\ *)?(\d+(\.\d+)?|(\"\w+\"))+(\ *)?)?)+\))");
         if (!std::regex_match(line, command_regex)) {
             output_stream << "Unknown command pattern!\nPlease enter command in following format:\n"
                         << "<QUERY_NAME>(<ARGUMENTS_SPLIT_BY_COLON>)" << std::endl;
