@@ -13,7 +13,7 @@
 namespace app {
 
     /// Command which signalizes end of interactive mode
-    static inline const char* EXIT_COMMAND = "EXIT";
+    static inline const char* Exit_Command = "EXIT";
 
     /**
      * @brief Processes command from input string and prints the outcome information into the @a output_stream.
@@ -32,7 +32,7 @@ namespace app {
 		Greet_User();
 
 		std::string line;
-        while (line != EXIT_COMMAND) {
+        while (line != Exit_Command) {
             std::getline(std::cin, line);
             if (!std::cin) {
                 std::cout << "Error while reading user input! Shutting down...";

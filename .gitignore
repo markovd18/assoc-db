@@ -2,3 +2,5 @@ out
 .vs
 .idea
 bin
+.vscode
+data/output.txt
