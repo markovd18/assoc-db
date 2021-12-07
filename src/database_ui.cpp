@@ -9,6 +9,7 @@
 #include <fstream>
 #include <string>
 #include <regex>
+#include <vector>
 
 namespace app {
 
@@ -32,11 +33,15 @@ namespace app {
 		Greet_User();
 
 		std::string line;
-        while (line != Exit_Command) {
+        while (true) {
             std::getline(std::cin, line);
             if (!std::cin) {
                 std::cout << "Error while reading user input! Shutting down...";
                 return;
+            }
+
+            if (line == Exit_Command) {
+                break;
             }
 
             Process_Command(line, std::cout);
