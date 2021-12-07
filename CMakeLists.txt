@@ -20,6 +20,8 @@ IF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR ${CMAKE_CXX_COMPILER_ID} MATCHE
     SET(CMAKE_CXX_FLAGS_DEBUG "-g")
 ENDIF()
 
+ADD_DEFINITIONS(-fconcepts)
+
 # collecting all source files for linking to the executable
 file(GLOB_RECURSE INCLUDE include/*.h include/*.cpp)
 file(GLOB_RECURSE SRC src/*.h src/*.cpp)
