@@ -28,7 +28,7 @@ namespace app {
     std::vector<std::string> Parse_Arguments(const std::string& arguments_line);
 
     void Greet_User() {
-        std::cout << "Welcome to KIV/CPP semestral work - memory database\nPlease, enter your query." << std::endl;
+        std::cout << "Welcome to KIV/CPP semester work - memory database\nPlease, enter your query." << std::endl;
     }
 
     void Print_Prompt() {
@@ -93,7 +93,7 @@ namespace app {
         const std::string query_name = trim_copy(line.substr(0, first_brace_index));
         const std::vector<std::string> arguments = Parse_Arguments(line.substr(first_brace_index + 1, second_brace_index - first_brace_index - 1));
 
-        query_handler.Handle_Query(query_name, arguments);
+        query_handler.Handle_Query(query_name, arguments, output_stream);
     }
 
     std::vector<std::string> Parse_Arguments(const std::string &arguments_line) {

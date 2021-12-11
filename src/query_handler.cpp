@@ -6,6 +6,7 @@
 #include <query_handler.h>
 
 #include <unordered_map>
+#include <stdexcept>
 
 static const char* Insert = "INSERT";
 static const char* Delete = "DELETE";
@@ -17,7 +18,7 @@ static const char* Average = "AVERAGE";
 static const char* Max = "MAX";
 static const char* Min = "Min";
 
-void query::CQuery_Handler::Handle_Query(const std::string &query, const std::vector<std::string> &parameters) const {
+void query::CQuery_Handler::Handle_Query(const std::string &query, const std::vector<std::string> &parameters, std::ostream& output_stream) const {
     const auto it = m_query_mapping.find(query);
     if (it == m_query_mapping.end()) {
         throw std::invalid_argument("Unknown query request! " + query + " operation does not exist.");
