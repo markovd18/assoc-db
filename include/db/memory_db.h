@@ -1,26 +1,44 @@
 /**
- * Created by <a href='mailto:markov.david@seznam.cz'>David Markov</a> on 08.12.21.
+ * Created by <a href='mailto:markovd@students.zcu.cz'>David Markov</a> on 08.12.21.
  */
 
 #pragma once
 
 #include <tuple>
 #include <variant>
-#include <map>
 #include <vector>
 #include <db/db.h>
 #include <functional>
 #include <concepts>
+#include <map>
 
 namespace db {
 
     /**
+     * @brief Memory database implementation of common interface.
+     */
+    class CMemory_Database final : public IDatabase {
+    private:
+        std::map<TDb_Element, std::vector<TDb_Element>> m_storage;
+    public:
+        TDB_Op_Result Insert(TDb_Element key, std::vector<TDb_Element> values) override;
+        TDB_Op_Result Delete(const TDb_Element& key, const std::optional<std::vector<TDb_Element>> &values) override;
+        TDB_Op_Result Key_Equals(const TDb_Element &key) override;
+        TDB_Op_Result Key_Greater(const TDb_Element &key) override;
+        TDB_Op_Result Key_Less(const TDb_Element &key) override;
+        TDB_Op_Result Find_Value(const TDb_Element &value) override;
+        TDB_Op_Result Average(const std::optional<TDb_Element> &key, double &storage) override;
+        TDB_Op_Result Min(const std::optional<TDb_Element> &key, TDb_Element &storage) override;
+        TDB_Op_Result Max(const std::optional<TDb_Element> &key, TDb_Element &storage) override;
+    };
+
+    /**
      * @brief Concept describing a comparison function that checks whether the DB element suits the comparison.
      *
-     * Comparison function has to take @a TDb_Full_Element type as the only input parameter and has to return @a bool.
+     * Comparison function has to take @a TDb_Element type as the only input parameter and has to return @a bool.
      */
     template<typename T>
-    concept Find_Value_Functor = requires (T a, TDb_Full_Element e) {
+    concept Find_Value_Functor = requires(T a, TDb_Element e) {
         { a(e) } -> std::convertible_to<bool>;
     };
 
@@ -28,9 +46,8 @@ namespace db {
      * @brief Programmer interface for database communication. Internally transfers request into valid form
      * and sends it to the standard database interface.
      */
-    class CMemory_Database final {
+    class CMemory_Db_Interface final {
     public:
-
         /**
          * @brief Enumeration of comparison operations which can be searched by in the database interface.
          */
@@ -48,7 +65,7 @@ namespace db {
          * @return number of stored elements
          */
         template<typename ...Args>
-        size_t Insert(const TDb_Full_Element& key, const Args... values) const;
+        TDB_Op_Result Insert(const TDb_Element &key, const Args... values) const;
 
         /**
          * @brief Deletes an entry with given key. If no value is passed, deletes the entire entry.
@@ -59,39 +76,38 @@ namespace db {
          * @return number of deleted values
          */
         template<typename ...Args>
-        size_t Delete(const TDb_Full_Element& key, const Args... values) const;
+        TDB_Op_Result Delete(const TDb_Element &key, const Args... values) const;
 
         /**
-         * @brief
-         * @param key
-         * @param db_operation
-         * @return
+         * @brief Searches a database entry which has key that is equal/lesser/greater than given key, based on
+         * passed kind of operation.
+         * @param key comparison key
+         * @param db_operation comparison action
+         * @return list of found entries
          */
-        [[nodiscard]] std::vector<TDb_Full_Element> Search_Key(const TDb_Full_Element& key,
-                                                               NDb_Operation db_operation) const;
+        [[nodiscard]] TDB_Op_Result Search_Key(const TDb_Element &key, NDb_Operation db_operation) const;
 
-        TDb_Entry Find_Value(Find_Value_Functor auto find_functor) const;
+        TDB_Op_Result Find_Value(Find_Value_Functor auto find_functor) const;
     };
+}
 
+extern db::CMemory_Database s_Memory_Database;
 
-    template<typename ...Args>
-    size_t CMemory_Database::Insert(const TDb_Full_Element& key, const Args... values) const {
-        std::vector<TDb_Full_Element> values_vec { values... };
-        return 0;
-    }
+namespace db {
 
     template<typename ...Args>
-    size_t CMemory_Database::Delete(const TDb_Full_Element &key, const Args... values) const {
-        std::vector<TDb_Full_Element> values_vec { values... };
-        return 0;
+    TDB_Op_Result CMemory_Db_Interface::Insert(const TDb_Element& key, const Args... values) const {
+        std::vector<TDb_Element> values_vec {values... };
+        return s_Memory_Database.Insert(key, values_vec);
     }
 
-    std::vector<TDb_Full_Element> CMemory_Database::Search_Key(const TDb_Full_Element &key,
-                                                               const CMemory_Database::NDb_Operation db_operation) const  {
-        return {};
+    template<typename ...Args>
+    TDB_Op_Result CMemory_Db_Interface::Delete(const TDb_Element &key, const Args... values) const {
+        std::vector<TDb_Element> values_vec {values... };
+        return s_Memory_Database.Delete(key, values_vec);
     }
 
-    TDb_Entry CMemory_Database::Find_Value(Find_Value_Functor auto find_functor) const {
-        return {};
+    TDB_Op_Result CMemory_Db_Interface::Find_Value(Find_Value_Functor auto find_functor) const {
+        return {};  //TODO
     }
 }

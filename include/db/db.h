@@ -1,5 +1,5 @@
 /**
- * Created by <a href='mailto:markov.david@seznam.cz'>David Markov</a> on 11.12.21.
+ * Created by <a href='mailto:markovd@students.zcu.cz'>David Markov</a> on 11.12.21.
  */
 
 #pragma once
@@ -9,6 +9,7 @@
 #include <variant>
 #include <utility>
 #include <vector>
+#include <memory>
 
 namespace db {
 
@@ -16,25 +17,54 @@ namespace db {
     using TDb_Basic_Element = std::variant<int, double, std::string>;
     /// Pair of basic database elements
     class CPair;
-    /// Complete element which can be stored in database - of type int, double, string or Pair
-    using TDb_Full_Element = std::variant<int, double, std::string, CPair>;
+    /// Element which can be stored in database - of type int, double, string or Pair
+    using TDb_Element = std::variant<int, double, std::string, std::shared_ptr<CPair>>;
     /// Complete entry which can be stored in database - key - value pair
-    using TDb_Entry = std::pair<TDb_Full_Element, std::vector<TDb_Full_Element>>;
+    using TDb_Entry = std::pair<TDb_Element, std::vector<TDb_Element>>;
 
     class CPair {
     private:
-        TDb_Basic_Element m_first;
-        TDb_Basic_Element m_second;
+        TDb_Element m_first;
+        TDb_Element m_second;
 
     public:
-        CPair(TDb_Basic_Element first, TDb_Basic_Element second) : m_first(std::move(first)), m_second(std::move(second)) {}
+        CPair(TDb_Element first, TDb_Element second) : m_first(std::move(first)), m_second(std::move(second)) {}
 
-        [[nodiscard]] const TDb_Basic_Element &Get_First() const {
+        [[nodiscard]] const TDb_Element &Get_First() const {
             return m_first;
         }
 
-        [[nodiscard]] const TDb_Basic_Element &Get_Second() const {
+        [[nodiscard]] const TDb_Element &Get_Second() const {
             return m_second;
+        }
+
+        bool operator==(const CPair& other) {
+            return m_first == other.m_first && m_second == other.m_second;
+        }
+
+        bool operator<(const CPair& other) {
+            return true;
+        }
+
+        bool operator<=(const CPair& other) {
+            return *this < other || *this == other;
+        }
+
+        bool operator>(const CPair& other) {
+            return true;
+        }
+
+        bool operator>=(const CPair& other) {
+            return *this > other || *this == other;
+        }
+
+        auto operator<=>(const CPair& other) {
+            auto result = m_first <=> other.m_first;
+            if (result != std::strong_ordering::equivalent) {
+                return result;
+            }
+
+            return m_second <=> other.m_second;
         }
     };
 
@@ -61,7 +91,7 @@ namespace db {
          * @param values list of values - may not be empty
          * @return result structure with success indicator and number of saved elements
          */
-        virtual TDB_Op_Result Insert(TDb_Full_Element key, std::vector<TDb_Full_Element> values) = 0;
+        virtual TDB_Op_Result Insert(TDb_Element key, std::vector<TDb_Element> values) = 0;
 
         /**
          * @brief Deletes an entry from the database.
@@ -73,35 +103,35 @@ namespace db {
          * only those specific values are deleted from the entry with given key. Fails when entry with given key does
          * not exist or when entry with given key does not contain any of given values.
          */
-        virtual TDB_Op_Result Delete(TDb_Full_Element key, const std::optional<std::vector<TDb_Full_Element>>& values) = 0;
+        virtual TDB_Op_Result Delete(const TDb_Element& key, const std::optional<std::vector<TDb_Element>>& values) = 0;
 
         /**
          * @brief Finds an entry which has key of given value.
          * @param key entry key
          * @return result structure with success indicator and found entry if exists
          */
-        virtual TDB_Op_Result Key_Equals(const TDb_Full_Element& key) = 0;
+        virtual TDB_Op_Result Key_Equals(const TDb_Element& key) = 0;
 
         /**
          * @brief Finds all entries which have key of greater value than given key.
          * @param key comparison key
          * @return result structure with success indicator, number of found entries and their list
          */
-        virtual TDB_Op_Result Key_Greater(const TDb_Full_Element& key) = 0;
+        virtual TDB_Op_Result Key_Greater(const TDb_Element& key) = 0;
 
         /**
          * @brief Finds all entries which have key of lesser value than given key.
          * @param key comparison key
          * @return result structure with success indicator, number of found entries and their list
          */
-        virtual TDB_Op_Result Key_Less(const TDb_Full_Element& key) = 0;
+        virtual TDB_Op_Result Key_Less(const TDb_Element& key) = 0;
 
         /**
          * @brief Finds all entries which contain given value on any position.
          * @param value value to find entries by
          * @return result structure with success indicator, number of found entries and their list
          */
-        virtual TDB_Op_Result Find_Value(const TDb_Full_Element& value) = 0;
+        virtual TDB_Op_Result Find_Value(const TDb_Element& value) = 0;
 
         /**
          * @brief Calculates an average value of stored numeric values.
@@ -109,7 +139,7 @@ namespace db {
          * @param storage storage where the computed average will be stored
          * @return result structure with success indicator and number of found entries with numeric value
          */
-        virtual TDB_Op_Result Average(const std::optional<TDb_Full_Element>& key, double& storage) = 0;
+        virtual TDB_Op_Result Average(const std::optional<TDb_Element>& key, double& storage) = 0;
 
         /**
          * @brief Finds minimum value of all database entries among all stored value types.
@@ -117,7 +147,7 @@ namespace db {
          * @param storage storage where found minimum element will be stored
          * @return result structure with success indicator and number of searched entries
          */
-        virtual TDB_Op_Result Min(const std::optional<TDb_Full_Element>& key, TDb_Full_Element& storage) = 0;
+        virtual TDB_Op_Result Min(const std::optional<TDb_Element>& key, TDb_Element& storage) = 0;
 
         /**
          * @brief Finds maximum value of all database entries among all stored value types.
@@ -125,6 +155,7 @@ namespace db {
          * @param storage storage where found maximum element will be stored
          * @return result structure with success indicator and number of searched entries
          */
-        virtual TDB_Op_Result Max(const std::optional<TDb_Full_Element>& key, TDb_Full_Element& storage) = 0;
+        virtual TDB_Op_Result Max(const std::optional<TDb_Element>& key, TDb_Element& storage) = 0;
+        virtual ~IDatabase() = default;
     };
 }

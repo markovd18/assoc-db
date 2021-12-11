@@ -3,7 +3,6 @@ out
 .vscode
 .idea
 bin
-.vscode
 data/output.txt
 build
 CMakeFiles

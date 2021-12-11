@@ -1,5 +1,5 @@
 /**
- * Created by <a href='mailto:markov.david@seznam.cz'>David Markov</a> on 08.12.21.
+ * Created by <a href='mailto:markovd@students.zcu.cz'>David Markov</a> on 08.12.21.
  */
 
 #pragma once

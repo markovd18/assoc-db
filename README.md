@@ -5,7 +5,7 @@
 - predefined pseudo-API:
 
 ```c++
-class CMemory_Database {
+class CMemory_Db_Interface {
   public:
     enum class Db_Operation
     {
