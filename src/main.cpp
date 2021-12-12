@@ -16,10 +16,20 @@ bool Is_Valid(const db::TDb_Element& e) {
 int main(int argc, char** argv) {
     db::CMemory_Db_Interface memory_db;
     memory_db.Insert(1, 1);
+    memory_db.Insert(2, 2);
     memory_db.Insert("ahoj", 25.6, "");
     memory_db.Insert("a", 'b');
     memory_db.Find_Value([] (const db::TDb_Element&) -> bool { return true; });
     memory_db.Find_Value(Is_Valid);
+    const auto result = memory_db.Search_Key("ahoj", db::CMemory_Db_Interface::NDb_Operation::Equals);
+    const auto result2 = memory_db.Search_Key(3, db::CMemory_Db_Interface::NDb_Operation::Less_Than);
+    const auto result3 = memory_db.Search_Key(3, db::CMemory_Db_Interface::NDb_Operation::Greater_Than);
+
+    double average;
+    s_Memory_Database.Average(std::nullopt, average);
+    memory_db.Delete(1);
+    memory_db.Delete("ahoj", 25.6);
+    memory_db.Delete("a", 'b');
 
     switch (argc) {
         case Interactive_Mode_Param_Count:

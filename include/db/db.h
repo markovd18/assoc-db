@@ -10,6 +10,7 @@
 #include <utility>
 #include <vector>
 #include <memory>
+#include <map_utils.h>
 
 namespace db {
 
@@ -21,6 +22,15 @@ namespace db {
     using TDb_Element = std::variant<int, double, std::string, std::shared_ptr<CPair>>;
     /// Complete entry which can be stored in database - key - value pair
     using TDb_Entry = std::pair<TDb_Element, std::vector<TDb_Element>>;
+
+    /**
+     * @brief Concept describing a comparison function that checks whether the DB element suits the comparison.
+     *
+     * Comparison function has to take @a TDb_Element type as the only input parameter and has to return @a bool.
+     */
+    template<typename T>
+    concept Find_Value_Functor = map::Find_Functor<T, TDb_Element>;
+
 
     class CPair {
     private:
@@ -43,7 +53,7 @@ namespace db {
         }
 
         bool operator<(const CPair& other) {
-            return true;
+            return m_first < other.m_first && m_second < other.m_second;
         }
 
         bool operator<=(const CPair& other) {
@@ -51,7 +61,7 @@ namespace db {
         }
 
         bool operator>(const CPair& other) {
-            return true;
+            return m_first > other.m_first && m_second > other.m_second;
         }
 
         bool operator>=(const CPair& other) {
@@ -110,28 +120,28 @@ namespace db {
          * @param key entry key
          * @return result structure with success indicator and found entry if exists
          */
-        virtual TDB_Op_Result Key_Equals(const TDb_Element& key) = 0;
+        virtual TDB_Op_Result Key_Equals(const TDb_Element& key) const = 0;
 
         /**
          * @brief Finds all entries which have key of greater value than given key.
          * @param key comparison key
          * @return result structure with success indicator, number of found entries and their list
          */
-        virtual TDB_Op_Result Key_Greater(const TDb_Element& key) = 0;
+        virtual TDB_Op_Result Key_Greater(const TDb_Element& key) const = 0;
 
         /**
          * @brief Finds all entries which have key of lesser value than given key.
          * @param key comparison key
          * @return result structure with success indicator, number of found entries and their list
          */
-        virtual TDB_Op_Result Key_Less(const TDb_Element& key) = 0;
+        virtual TDB_Op_Result Key_Less(const TDb_Element& key) const = 0;
 
         /**
          * @brief Finds all entries which contain given value on any position.
          * @param value value to find entries by
          * @return result structure with success indicator, number of found entries and their list
          */
-        virtual TDB_Op_Result Find_Value(const TDb_Element& value) = 0;
+        virtual TDB_Op_Result Find_Value(const TDb_Element& value) const = 0;
 
         /**
          * @brief Calculates an average value of stored numeric values.
@@ -139,7 +149,7 @@ namespace db {
          * @param storage storage where the computed average will be stored
          * @return result structure with success indicator and number of found entries with numeric value
          */
-        virtual TDB_Op_Result Average(const std::optional<TDb_Element>& key, double& storage) = 0;
+        virtual TDB_Op_Result Average(const std::optional<TDb_Element>& key, double& storage) const = 0;
 
         /**
          * @brief Finds minimum value of all database entries among all stored value types.
@@ -147,7 +157,7 @@ namespace db {
          * @param storage storage where found minimum element will be stored
          * @return result structure with success indicator and number of searched entries
          */
-        virtual TDB_Op_Result Min(const std::optional<TDb_Element>& key, TDb_Element& storage) = 0;
+        virtual TDB_Op_Result Min(const std::optional<TDb_Element>& key, TDb_Element& storage) const = 0;
 
         /**
          * @brief Finds maximum value of all database entries among all stored value types.
@@ -155,7 +165,7 @@ namespace db {
          * @param storage storage where found maximum element will be stored
          * @return result structure with success indicator and number of searched entries
          */
-        virtual TDB_Op_Result Max(const std::optional<TDb_Element>& key, TDb_Element& storage) = 0;
+        virtual TDB_Op_Result Max(const std::optional<TDb_Element>& key, TDb_Element& storage) const = 0;
         virtual ~IDatabase() = default;
     };
 }

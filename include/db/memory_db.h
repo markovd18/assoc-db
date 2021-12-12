@@ -23,23 +23,13 @@ namespace db {
     public:
         TDB_Op_Result Insert(TDb_Element key, std::vector<TDb_Element> values) override;
         TDB_Op_Result Delete(const TDb_Element& key, const std::optional<std::vector<TDb_Element>> &values) override;
-        TDB_Op_Result Key_Equals(const TDb_Element &key) override;
-        TDB_Op_Result Key_Greater(const TDb_Element &key) override;
-        TDB_Op_Result Key_Less(const TDb_Element &key) override;
-        TDB_Op_Result Find_Value(const TDb_Element &value) override;
-        TDB_Op_Result Average(const std::optional<TDb_Element> &key, double &storage) override;
-        TDB_Op_Result Min(const std::optional<TDb_Element> &key, TDb_Element &storage) override;
-        TDB_Op_Result Max(const std::optional<TDb_Element> &key, TDb_Element &storage) override;
-    };
-
-    /**
-     * @brief Concept describing a comparison function that checks whether the DB element suits the comparison.
-     *
-     * Comparison function has to take @a TDb_Element type as the only input parameter and has to return @a bool.
-     */
-    template<typename T>
-    concept Find_Value_Functor = requires(T a, TDb_Element e) {
-        { a(e) } -> std::convertible_to<bool>;
+        TDB_Op_Result Key_Equals(const TDb_Element &key) const override;
+        TDB_Op_Result Key_Greater(const TDb_Element &key) const override;
+        TDB_Op_Result Key_Less(const TDb_Element &key) const override;
+        TDB_Op_Result Find_Value(const TDb_Element &value) const override;
+        TDB_Op_Result Average(const std::optional<TDb_Element> &key, double &storage) const override;
+        TDB_Op_Result Min(const std::optional<TDb_Element> &key, TDb_Element &storage) const override;
+        TDB_Op_Result Max(const std::optional<TDb_Element> &key, TDb_Element &storage) const override;
     };
 
     /**
