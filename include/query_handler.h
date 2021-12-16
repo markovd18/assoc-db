@@ -8,21 +8,16 @@
 #include <vector>
 #include <unordered_map>
 #include <ostream>
+#include <memory>
+#include <functional>
+#include <db/query.h>
 
 namespace query {
 
-    /// Types of queries that can be executed
-    enum class Query {
-        Insert,
-        Delete,
-        Key_Equals,
-        Key_Greater,
-        Key_Less,
-        Find_Value,
-        Average,
-        Max,
-        Min
-    };
+    template<typename T>
+    std::unique_ptr<IQuery> Create_Query() {
+        return std::make_unique<T>();
+    }
 
     /**
      *  Query Handler processes individual queries as string requests with string arguments
@@ -30,7 +25,7 @@ namespace query {
      */
     class CQuery_Handler {
     private:
-        std::unordered_map<std::string, Query> m_query_mapping;
+        std::unordered_map<std::string, std::function<std::unique_ptr<query::IQuery>()>> m_query_mapping;
     public:
         CQuery_Handler();
 
@@ -41,5 +36,8 @@ namespace query {
          * @param output_stream output stream that results will be printed into
          */
         void Handle_Query(const std::string& query, const std::vector<std::string>& parameters, std::ostream& output_stream) const;
+
+    private:
+        std::unique_ptr<query::IQuery> Construct_Query(const std::string& query_name) const;
     };
 }

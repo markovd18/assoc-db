@@ -15,7 +15,24 @@
 namespace app {
 
     /// Command which signalizes end of interactive mode
-    static inline const char* Exit_Command = "EXIT";
+    static const char* Exit_Command = "EXIT";
+
+    bool Is_Input_Path_Valid(const std::string& path) {
+        return !path.empty() && filesystem::exists(path) && !filesystem::is_directory(path);
+    }
+
+    bool Is_Output_Path_Valid(const std::string& path) {
+        return !path.empty() & !filesystem::is_directory(path);
+    }
+
+    bool Is_Input_Command_Read(std::istream& input_stream, std::string& line) {
+        if (!std::getline(input_stream, line)) {
+            return false;
+        }
+
+        Remove_Trailing_Carriage_Return(line);
+        return true;
+    }
 
     /**
      * @brief Processes command from input string and prints the outcome information into the @a output_stream.
@@ -59,11 +76,11 @@ namespace app {
 	}
 
     void CDatabase_UI_App::Run_Batch_Mode(const filesystem::path& input_file, const filesystem::path& output_file) {
-        if (input_file.empty() || !filesystem::exists(input_file) || filesystem::is_directory(input_file)) {
+        if (!Is_Input_Path_Valid(input_file)) {
             throw std::invalid_argument("Path to the input file has to be valid path to an existing file! Not a folder!");
         }
 
-        if (output_file.empty() || filesystem::is_directory(output_file)) {
+        if (!Is_Output_Path_Valid(output_file)) {
             throw std::invalid_argument("Path to the output file has to be valid path to a file! Not a folder!");
         }
 
@@ -71,16 +88,13 @@ namespace app {
         std::ofstream output_stream(output_file);
         std::ifstream input_stream(input_file);
         query::CQuery_Handler query_handler;
-        while (std::getline(input_stream, line)) {
-            if (line.back() == '\r') {  /// making sure we don't have trailing CR on windows
-                line = line.substr(0, line.size() - 1);
-            }
-
+        while (Is_Input_Command_Read(input_stream, line)) {
             Process_Command(line, query_handler, output_stream);
         }
 	}
 
     void Process_Command(const std::string &line, const query::CQuery_Handler& query_handler, std::ostream &output_stream) {
+        /// pattern is <QUERY>(<parameters>) eg. INSERT("hello", 1, 2)
         static const std::regex command_regex(R"(\w+(\ *)?\(((\d+(\.\d+)?|(\"\w+\"))?(\,(\ *)?(\d+(\.\d+)?|(\"\w+\"))+(\ *)?)?)+\))");
         if (!std::regex_match(line, command_regex)) {
             output_stream << "Unknown command pattern!\nPlease enter command in following format:\n"
@@ -91,7 +105,8 @@ namespace app {
         const std::size_t first_brace_index = line.find('(');
         const std::size_t second_brace_index = line.find(')');
         const std::string query_name = trim_copy(line.substr(0, first_brace_index));
-        const std::vector<std::string> arguments = Parse_Arguments(line.substr(first_brace_index + 1, second_brace_index - first_brace_index - 1));
+        const std::string passed_arguments = line.substr(first_brace_index + 1, second_brace_index - first_brace_index - 1);
+        const std::vector<std::string> arguments = Parse_Arguments(passed_arguments);
 
         query_handler.Handle_Query(query_name, arguments, output_stream);
     }

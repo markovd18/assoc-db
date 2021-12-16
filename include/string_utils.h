@@ -53,8 +53,14 @@ std::vector<std::string> split(const std::string& string, const char delimiter) 
     std::vector<std::string> tokens;
 
     while (std::getline(iss, token, delimiter)) {
-        tokens.emplace_back(std::move(trim_copy(token)));
+        tokens.emplace_back(trim_copy(token));
     }
 
     return tokens;
+}
+
+void Remove_Trailing_Carriage_Return(std::string& string) {
+    if (string.back() == '\r') {
+        string = string.substr(0, string.size() - 1);
+    }
 }

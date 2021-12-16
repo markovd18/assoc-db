@@ -7,6 +7,7 @@
 
 #include <unordered_map>
 #include <stdexcept>
+#include <db/query.h>
 
 static const char* Insert = "INSERT";
 static const char* Delete = "DELETE";
@@ -19,41 +20,31 @@ static const char* Max = "MAX";
 static const char* Min = "Min";
 
 void query::CQuery_Handler::Handle_Query(const std::string &query, const std::vector<std::string> &parameters, std::ostream& output_stream) const {
-    const auto it = m_query_mapping.find(query);
-    if (it == m_query_mapping.end()) {
+    const std::unique_ptr<query::IQuery> query_ptr = Construct_Query(query);
+    if (!query_ptr) {
         throw std::invalid_argument("Unknown query request! " + query + " operation does not exist.");
     }
 
-    switch (it->second) {
-        case Query::Insert:
-            break;
-        case Query::Delete:
-            break;
-        case Query::Key_Equals:
-            break;
-        case Query::Key_Greater:
-            break;
-        case Query::Key_Less:
-            break;
-        case Query::Find_Value:
-            break;
-        case Query::Average:
-            break;
-        case Query::Max:
-            break;
-        case Query::Min:
-            break;
-    }
+    query_ptr->Execute(parameters, output_stream);
 }
 
 query::CQuery_Handler::CQuery_Handler() : m_query_mapping({
-    { Insert, Query::Insert },
-    { Delete, Query::Delete },
-    { Key_Equals, Query::Key_Equals },
-    { Key_Greater, Query::Key_Greater },
-    { Key_Less, Query::Key_Less  },
-    { Find_Value, Query::Find_Value },
-    { Average, Query::Average },
-    { Max, Query::Max },
-    { Min, Query::Min }
+    { Insert, query::Create_Query<query::CInsert_Query> },
+    { Delete, query::Create_Query<query::CDelete_Query> },
+    { Key_Equals, query::Create_Query<query::CKey_Equals_Query> },
+    { Key_Greater, query::Create_Query<query::CKey_Greater_Query> },
+    { Key_Less, query::Create_Query<query::CKey_Less_Query>  },
+    { Find_Value, query::Create_Query<query::CFind_Value_Query> },
+    { Average, query::Create_Query<query::CAverage_Query> },
+    { Max, query::Create_Query<query::CMax_Query> },
+    { Min, query::Create_Query<query::CMin_Query> }
 }) {}
+
+std::unique_ptr<query::IQuery> query::CQuery_Handler::Construct_Query(const std::string& query_name) const {
+    const auto found_pair = m_query_mapping.find(query_name);
+    if (found_pair == m_query_mapping.end()) {
+        return nullptr;
+    }
+
+    return found_pair->second();
+}

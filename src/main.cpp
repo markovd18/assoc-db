@@ -5,6 +5,8 @@
 #include <iostream>
 #include <database_ui.h>
 #include <db/memory_db.h>
+#include <db/query.h>
+#include <query_handler.h>
 
 constexpr uint8_t Interactive_Mode_Param_Count = 1;
 constexpr uint8_t Batch_Mode_Param_Count = 3;
