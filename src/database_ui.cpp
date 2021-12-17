@@ -4,7 +4,7 @@
 
 #include <database_ui.h>
 #include <filesystem.h>
-#include <string_utils.h>
+#include <utils/string_utils.h>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -89,13 +89,14 @@ namespace app {
         std::ifstream input_stream(input_file);
         query::CQuery_Handler query_handler;
         while (Is_Input_Command_Read(input_stream, line)) {
+            output_stream << line << std::endl;
             Process_Command(line, query_handler, output_stream);
         }
 	}
 
     void Process_Command(const std::string &line, const query::CQuery_Handler& query_handler, std::ostream &output_stream) {
-        /// pattern is <QUERY>(<parameters>) eg. INSERT("hello", 1, 2)
-        static const std::regex command_regex(R"(\w+(\ *)?\(((\d+(\.\d+)?|(\"\w+\"))?(\,(\ *)?(\d+(\.\d+)?|(\"\w+\"))+(\ *)?)?)+\))");
+        /// pattern is <QUERY>(<parameter1>, <parameter2>, ...) eg. INSERT("hello", 1, 2)
+        static const std::regex command_regex(R"(\w+\ *\((\d+(\.\d+)?|(\"[^\"]*\"))?(\,\ *((\d+(\.\d+)?)|(\"[^\"]*\"))\ *)*\))");
         if (!std::regex_match(line, command_regex)) {
             output_stream << "Unknown command pattern!\nPlease enter command in following format:\n"
                         << "<QUERY_NAME>(<ARGUMENTS_SPLIT_BY_COLON>)" << std::endl;
@@ -108,7 +109,11 @@ namespace app {
         const std::string passed_arguments = line.substr(first_brace_index + 1, second_brace_index - first_brace_index - 1);
         const std::vector<std::string> arguments = Parse_Arguments(passed_arguments);
 
-        query_handler.Handle_Query(query_name, arguments, output_stream);
+        try {
+            query_handler.Handle_Query(query_name, arguments, output_stream);
+        } catch(const std::exception& e) {
+            output_stream << e.what() << std::endl;
+        }
     }
 
     std::vector<std::string> Parse_Arguments(const std::string &arguments_line) {

@@ -14,11 +14,6 @@
 
 namespace query {
 
-    template<typename T>
-    std::unique_ptr<IQuery> Create_Query() {
-        return std::make_unique<T>();
-    }
-
     /**
      *  Query Handler processes individual queries as string requests with string arguments
      *  and executes right database query with parameters transformed into correct type.

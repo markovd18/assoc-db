@@ -10,12 +10,10 @@
 #include <utility>
 #include <vector>
 #include <memory>
-#include <map_utils.h>
+#include <utils/map_utils.h>
 
 namespace db {
 
-    /// Basic element which can be stored in database - of type int, double or string
-    using TDb_Basic_Element = std::variant<int, double, std::string>;
     /// Pair of basic database elements
     class CPair;
     /// Element which can be stored in database - of type int, double, string or Pair
@@ -76,18 +74,17 @@ namespace db {
 
             return m_second <=> other.m_second;
         }
+
+        friend std::ostream& operator<<(std::ostream &output_stream, const CPair &pair);
     };
 
     /**
      * @brief Result of every database request
      */
-    struct TDB_Op_Result {
-        /// indicator of successful request
+    struct TDB_Query_Result {
         bool success = true;
-        /// number of entries affected by the request
-        size_t affected = 0;
-        /// optional list of affected entries - for filtration requests only
-        std::optional<std::vector<TDb_Entry>> affected_entries;
+        size_t affected_row_count = 0;
+        std::optional<std::vector<TDb_Entry>> affected_rows;
     };
 
     /**
@@ -101,7 +98,7 @@ namespace db {
          * @param values list of values - may not be empty
          * @return result structure with success indicator and number of saved elements
          */
-        virtual TDB_Op_Result Insert(TDb_Element key, std::vector<TDb_Element> values) = 0;
+        virtual TDB_Query_Result Insert(TDb_Element key, std::vector<TDb_Element> values) = 0;
 
         /**
          * @brief Deletes an entry from the database.
@@ -113,35 +110,35 @@ namespace db {
          * only those specific values are deleted from the entry with given key. Fails when entry with given key does
          * not exist or when entry with given key does not contain any of given values.
          */
-        virtual TDB_Op_Result Delete(const TDb_Element& key, const std::optional<std::vector<TDb_Element>>& values) = 0;
+        virtual TDB_Query_Result Delete(const TDb_Element& key, const std::optional<std::vector<TDb_Element>>& values) = 0;
 
         /**
          * @brief Finds an entry which has key of given value.
          * @param key entry key
          * @return result structure with success indicator and found entry if exists
          */
-        virtual TDB_Op_Result Key_Equals(const TDb_Element& key) const = 0;
+        [[nodiscard]] virtual TDB_Query_Result Key_Equals(const TDb_Element& key) const = 0;
 
         /**
          * @brief Finds all entries which have key of greater value than given key.
          * @param key comparison key
          * @return result structure with success indicator, number of found entries and their list
          */
-        virtual TDB_Op_Result Key_Greater(const TDb_Element& key) const = 0;
+        [[nodiscard]] virtual TDB_Query_Result Key_Greater(const TDb_Element& key) const = 0;
 
         /**
          * @brief Finds all entries which have key of lesser value than given key.
          * @param key comparison key
          * @return result structure with success indicator, number of found entries and their list
          */
-        virtual TDB_Op_Result Key_Less(const TDb_Element& key) const = 0;
+        [[nodiscard]] virtual TDB_Query_Result Key_Less(const TDb_Element& key) const = 0;
 
         /**
          * @brief Finds all entries which contain given value on any position.
          * @param value value to find entries by
          * @return result structure with success indicator, number of found entries and their list
          */
-        virtual TDB_Op_Result Find_Value(const TDb_Element& value) const = 0;
+        [[nodiscard]] virtual TDB_Query_Result Find_Value(const TDb_Element& value) const = 0;
 
         /**
          * @brief Calculates an average value of stored numeric values.
@@ -149,7 +146,7 @@ namespace db {
          * @param storage storage where the computed average will be stored
          * @return result structure with success indicator and number of found entries with numeric value
          */
-        virtual TDB_Op_Result Average(const std::optional<TDb_Element>& key, double& storage) const = 0;
+        virtual TDB_Query_Result Average(const std::optional<TDb_Element>& key, double& storage) const = 0;
 
         /**
          * @brief Finds minimum value of all database entries among all stored value types.
@@ -157,7 +154,7 @@ namespace db {
          * @param storage storage where found minimum element will be stored
          * @return result structure with success indicator and number of searched entries
          */
-        virtual TDB_Op_Result Min(const std::optional<TDb_Element>& key, TDb_Element& storage) const = 0;
+        virtual TDB_Query_Result Min(const std::optional<TDb_Element>& key, TDb_Element& storage) const = 0;
 
         /**
          * @brief Finds maximum value of all database entries among all stored value types.
@@ -165,7 +162,7 @@ namespace db {
          * @param storage storage where found maximum element will be stored
          * @return result structure with success indicator and number of searched entries
          */
-        virtual TDB_Op_Result Max(const std::optional<TDb_Element>& key, TDb_Element& storage) const = 0;
+        virtual TDB_Query_Result Max(const std::optional<TDb_Element>& key, TDb_Element& storage) const = 0;
         virtual ~IDatabase() = default;
     };
 }

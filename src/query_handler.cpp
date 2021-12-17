@@ -17,7 +17,7 @@ static const char* Key_Less = "KEY_LESS";
 static const char* Find_Value = "FIND_VALUE";
 static const char* Average = "AVERAGE";
 static const char* Max = "MAX";
-static const char* Min = "Min";
+static const char* Min = "MIN";
 
 void query::CQuery_Handler::Handle_Query(const std::string &query, const std::vector<std::string> &parameters, std::ostream& output_stream) const {
     const std::unique_ptr<query::IQuery> query_ptr = Construct_Query(query);

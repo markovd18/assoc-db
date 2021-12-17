@@ -6,32 +6,27 @@
 #include <database_ui.h>
 #include <db/memory_db.h>
 #include <db/query.h>
-#include <query_handler.h>
 
 constexpr uint8_t Interactive_Mode_Param_Count = 1;
 constexpr uint8_t Batch_Mode_Param_Count = 3;
 
-bool Is_Valid(const db::TDb_Element& e) {
-    return false;
+void Prepare_Database() {
+    db::CMemory_Db_Interface memory_db_interface;
+    const db::TDB_Query_Result result = memory_db_interface.Search_Key("Author", db::CMemory_Db_Interface::NDb_Operation::Equals);
+    if (result.affected_row_count == 0) {
+        memory_db_interface.Insert("Author", std::make_shared<db::CPair>("David", "Markov"), "A21N0059P");
+    }
+
+    const db::TDB_Query_Result ridiculous_question = memory_db_interface.Search_Key("Which type of bear is best?",
+                                                                                    db::CMemory_Db_Interface::NDb_Operation::Equals);
+    if (ridiculous_question.affected_row_count == 0) {
+        memory_db_interface.Insert("Which type of bear is best?", "Black bear");
+        memory_db_interface.Insert("Identity theft", 1'000'000, "every year");
+    }
 }
-
 int main(int argc, char** argv) {
-    db::CMemory_Db_Interface memory_db;
-    memory_db.Insert(1, 1);
-    memory_db.Insert(2, 2);
-    memory_db.Insert("ahoj", 25.6, "");
-    memory_db.Insert("a", 'b');
-    memory_db.Find_Value([] (const db::TDb_Element&) -> bool { return true; });
-    memory_db.Find_Value(Is_Valid);
-    const auto result = memory_db.Search_Key("ahoj", db::CMemory_Db_Interface::NDb_Operation::Equals);
-    const auto result2 = memory_db.Search_Key(3, db::CMemory_Db_Interface::NDb_Operation::Less_Than);
-    const auto result3 = memory_db.Search_Key(3, db::CMemory_Db_Interface::NDb_Operation::Greater_Than);
+    Prepare_Database();
 
-    double average;
-    s_Memory_Database.Average(std::nullopt, average);
-    memory_db.Delete(1);
-    memory_db.Delete("ahoj", 25.6);
-    memory_db.Delete("a", 'b');
 
     switch (argc) {
         case Interactive_Mode_Param_Count:
