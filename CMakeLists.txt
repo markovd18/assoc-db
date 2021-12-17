@@ -12,6 +12,8 @@ set(LINK_STDCPP_FS FALSE)
 IF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR ${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
     ADD_DEFINITIONS(-Wall -Wextra -Wno-ignored-attributes -Wno-deprecated-declarations -Wno-unknown-pragmas -Wno-unused-parameter -fPIC)
     set(LINK_STDCPP_FS TRUE)
+    ADD_DEFINITIONS(-fconcepts)
+
     # gcc reports a specific use case of copy semantics as deprecated, unlike Clang
     IF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         ADD_DEFINITIONS(-Wno-deprecated-copy -Wimplicit-fallthrough=0 -Wno-class-memaccess)
@@ -19,8 +21,6 @@ IF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR ${CMAKE_CXX_COMPILER_ID} MATCHE
     # debug build = no optimization, add debug symbols
     SET(CMAKE_CXX_FLAGS_DEBUG "-g")
 ENDIF()
-
-ADD_DEFINITIONS(-fconcepts)
 
 # collecting all source files for linking to the executable
 file(GLOB_RECURSE INCLUDE include/*.h include/*.cpp)

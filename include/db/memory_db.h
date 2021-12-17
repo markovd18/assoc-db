@@ -11,6 +11,7 @@
 #include <functional>
 #include <concepts>
 #include <map>
+#include <algorithm>
 #include "query.h"
 
 namespace db {

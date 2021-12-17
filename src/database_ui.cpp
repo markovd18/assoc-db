@@ -17,11 +17,11 @@ namespace app {
     /// Command which signalizes end of interactive mode
     static const char* Exit_Command = "EXIT";
 
-    bool Is_Input_Path_Valid(const std::string& path) {
+    bool Is_Input_Path_Valid(const filesystem::path& path) {
         return !path.empty() && filesystem::exists(path) && !filesystem::is_directory(path);
     }
 
-    bool Is_Output_Path_Valid(const std::string& path) {
+    bool Is_Output_Path_Valid(const filesystem::path& path) {
         return !path.empty() & !filesystem::is_directory(path);
     }
 
